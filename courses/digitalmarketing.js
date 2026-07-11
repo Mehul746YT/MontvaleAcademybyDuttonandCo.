@@ -1,3 +1,6 @@
+// We obfuscate the correct options array using a simple mathematical offset key to secure answers from Inspect Element checks.
+const ANSWER_KEY_OFFSET = 12;
+
 const QUESTIONS = [
     {
         id: 1,
@@ -8,7 +11,7 @@ const QUESTIONS = [
             "Paying publishers to host tracking code and affiliate landing links.",
             "Creating multi-channel email campaigns for lead nurturing."
         ],
-        answer: 1
+        ansKey: 13 // 1 + 12 = 13
     },
     {
         id: 2,
@@ -19,7 +22,7 @@ const QUESTIONS = [
             "The underlying purpose or objective a user has when entering a search query.",
             "The density of synonyms placed within a website's header tag."
         ],
-        answer: 2
+        ansKey: 14 // 2 + 12 = 14
     },
     {
         id: 3,
@@ -30,7 +33,7 @@ const QUESTIONS = [
             "The number of pages a search engine bot will crawl and index on a website within a given timeframe.",
             "The bandwidth allocation restricted by local CDN server regions."
         ],
-        answer: 2
+        ansKey: 14
     },
     {
         id: 4,
@@ -41,7 +44,7 @@ const QUESTIONS = [
             "Broad Match",
             "Negative Match"
         ],
-        answer: 2
+        ansKey: 14
     },
     {
         id: 5,
@@ -52,7 +55,7 @@ const QUESTIONS = [
             "Average purchase value divided by conversion rate.",
             "Total revenue divided by the customer lifetime value (LTV)."
         ],
-        answer: 1
+        ansKey: 13
     },
     {
         id: 6,
@@ -63,7 +66,7 @@ const QUESTIONS = [
             "Ensures the layout conforms to WCAG accessibility compliance.",
             "Measures the actual speed improvements on the CDN server."
         ],
-        answer: 1
+        ansKey: 13
     },
     {
         id: 7,
@@ -74,7 +77,7 @@ const QUESTIONS = [
             "GA4 relies on an event-based measurement model instead of session-based hits.",
             "GA4 removes the ability to track outbound external link clicks."
         ],
-        answer: 2
+        ansKey: 14
     },
     {
         id: 8,
@@ -85,7 +88,7 @@ const QUESTIONS = [
             "That the tracking pixels are configured perfectly to record standard sessions.",
             "A high conversion probability index for direct checkout paths."
         ],
-        answer: 1
+        ansKey: 13
     },
     {
         id: 9,
@@ -96,7 +99,7 @@ const QUESTIONS = [
             "Optimising meta descriptions, header tags, and page content structure.",
             "Submitting an XML sitemap directly to search consoles."
         ],
-        answer: 2
+        ansKey: 14
     },
     {
         id: 10,
@@ -107,7 +110,7 @@ const QUESTIONS = [
             "The percentage increase in organic search engine rank positions.",
             "The average CPC bidding threshold set inside automated smart campaigns."
         ],
-        answer: 0
+        ansKey: 12 // 0 + 12 = 12
     },
     {
         id: 11,
@@ -118,7 +121,7 @@ const QUESTIONS = [
             "Product & Offer Schema",
             "ProfilePage Schema"
         ],
-        answer: 2
+        ansKey: 14
     },
     {
         id: 12,
@@ -129,7 +132,7 @@ const QUESTIONS = [
             "Phrase match is cheaper as search engines do not charge fees for exact matches.",
             "Phrase match displays ads even when query synonyms differ entirely in user intent."
         ],
-        answer: 1
+        ansKey: 13
     },
     {
         id: 13,
@@ -140,7 +143,7 @@ const QUESTIONS = [
             "Formatted as inline text to prevent users from identifying it as an advertisement link.",
             "Hidden behind hover dropdown menus to optimize layout space."
         ],
-        answer: 1
+        ansKey: 13
     },
     {
         id: 14,
@@ -151,7 +154,7 @@ const QUESTIONS = [
             "Preliminary steps indicating user interest, such as newsletter signups or cart additions.",
             "Invisible tracking script triggers used to detect bot visits."
         ],
-        answer: 2
+        ansKey: 14
     },
     {
         id: 15,
@@ -162,7 +165,7 @@ const QUESTIONS = [
             "The historic total spend of the advertising account.",
             "The geographic distance between the user and the advertiser."
         ],
-        answer: 1
+        ansKey: 13
     },
     {
         id: 16,
@@ -173,7 +176,7 @@ const QUESTIONS = [
             "Bypass regional privacy laws and collect direct user emails.",
             "Generate automatic visual dashboards directly inside third-party website builders."
         ],
-        answer: 1
+        ansKey: 13
     },
     {
         id: 17,
@@ -184,7 +187,7 @@ const QUESTIONS = [
             "Page load latency and core web vitals",
             "Total closed sales deals"
         ],
-        answer: 2
+        ansKey: 14
     },
     {
         id: 18,
@@ -195,7 +198,7 @@ const QUESTIONS = [
             "The standard measurement for customer acquisition cycles.",
             "The maximum load capacity of a processing bottleneck."
         ],
-        answer: 1
+        ansKey: 13
     },
     {
         id: 19,
@@ -206,7 +209,7 @@ const QUESTIONS = [
             "Ahrefs Keyword Explorer",
             "Google Search Console"
         ],
-        answer: 1
+        ansKey: 13
     },
     {
         id: 20,
@@ -217,7 +220,7 @@ const QUESTIONS = [
             "It shows that users bounce instantly before recording custom analytics events.",
             "It requires immediate bidding modifications in the Google Ads panel to prevent traffic loss."
         ],
-        answer: 1
+        ansKey: 13
     }
 ];
 
@@ -277,12 +280,14 @@ async function submitExam() {
 
     let score = 0;
     QUESTIONS.forEach(q => {
-        if (selectedAnswers[q.id] === q.answer) {
+        const realAnswer = q.ansKey - ANSWER_KEY_OFFSET;
+        if (selectedAnswers[q.id] === realAnswer) {
             score++;
         }
     });
 
-    const passed = score >= 17;
+    const percentage = (score / QUESTIONS.length) * 100;
+    const passed = percentage >= 85;
     const container = document.querySelector(".container");
 
     if (passed) {
@@ -314,7 +319,7 @@ async function submitExam() {
         container.innerHTML = `
             <div class="card" style="text-align: center;">
                 <h2 style="color: #d9534f;">Assessment Not Passed</h2>
-                <p>You scored <strong>${score} out of 20</strong> (${Math.round((score/20)*100)}%). A minimum score of 85% (17/20) is required to pass.</p>
+                <p>You scored <strong>${score} out of 20</strong> (${Math.round(percentage)}%). A minimum score of 85% is required to pass.</p>
                 <p>Please review the study material and try again when you are ready.</p>
                 <button onclick="window.location.reload();">Retry Assessment</button>
             </div>

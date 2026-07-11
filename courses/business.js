@@ -1,38 +1,43 @@
+// We obfuscate the correct options array using a simple mathematical offset or base64 to hide it from a basic inspect element check.
+// In this case, we'll store the answers in the code as shifted indices, and compute them at evaluation time.
+// E.g., if the real index is 1, and the offset is 5, stored answer is 6 (restored via (val - 5)).
+const ANSWER_KEY_OFFSET = 7;
+
 const QUESTIONS = [
     // STRATEGIC MANAGEMENT
-    { question: "Which strategy focuses on becoming the lowest-cost producer in the industry?", options: ["Differentiation", "Cost Leadership", "Focus Strategy", "Diversification"], answer: 1 },
-    { question: "In M&A, 'Synergy' refers to:", options: ["Increased regulation", "Combined value exceeding individual parts", "Cost of rebranding", "Legal fees"], answer: 1 },
-    { question: "The 'Balanced Scorecard' measures performance through which four perspectives?", options: ["Financial, Customer, Internal Process, Growth", "Sales, Marketing, HR, IT", "Assets, Liabilities, Equity, Revenue", "CEO, Board, Managers, Staff"], answer: 0 },
-    { question: "A 'Hostile Takeover' occurs when:", options: ["The board approves the merger", "An acquisition is attempted without management consent", "Government bans the deal", "Employees go on strike"], answer: 1 },
-    { question: "What is the primary legal obligation of corporate officers to stakeholders?", options: ["Maximize CEO salary", "Fiduciary Duty", "Reduce dividends", "Avoid marketing"], answer: 1 },
+    { question: "Which strategy focuses on becoming the lowest-cost producer in the industry?", options: ["Differentiation", "Cost Leadership", "Focus Strategy", "Diversification"], ansKey: 8 }, // 1 + 7 = 8
+    { question: "In M&A, 'Synergy' refers to:", options: ["Increased regulation", "Combined value exceeding individual parts", "Cost of rebranding", "Legal fees"], ansKey: 8 },
+    { question: "The 'Balanced Scorecard' measures performance through which four perspectives?", options: ["Financial, Customer, Internal Process, Growth", "Sales, Marketing, HR, IT", "Assets, Liabilities, Equity, Revenue", "CEO, Board, Managers, Staff"], ansKey: 7 }, // 0 + 7 = 7
+    { question: "A 'Hostile Takeover' occurs when:", options: ["The board approves the merger", "An acquisition is attempted without management consent", "Government bans the deal", "Employees go on strike"], ansKey: 8 },
+    { question: "What is the primary legal obligation of corporate officers to stakeholders?", options: ["Maximize CEO salary", "Fiduciary Duty", "Reduce dividends", "Avoid marketing"], ansKey: 8 },
 
     // FINANCIAL ANALYSIS
-    { question: "Why must expenses be recorded in the same period as the revenue they help generate?", options: ["Cash counting rules", "The Matching Principle", "Government regulation", "Asset parity"], answer: 1 },
-    { question: "How is 'Net Working Capital' derived?", options: ["Total Assets - Total Liabilities", "Current Assets - Current Liabilities", "Revenue - Expenses", "Cash Inflow - Outflow"], answer: 1 },
-    { question: "What does the 'Quick Ratio' measure?", options: ["Debt-to-Equity", "Short-term liquidity", "Return on Equity", "Gross Margin"], answer: 1 },
-    { question: "The Capital Asset Pricing Model (CAPM) is used to:", options: ["Price physical assets", "Calculate expected return based on risk", "Value brand equity", "Manage payroll"], answer: 1 },
-    { question: "What is the 'Rule of 72' used for?", options: ["Tax liabilities", "Estimating time to double an investment", "Inventory turnover", "Employee tenure"], answer: 1 },
+    { question: "Why must expenses be recorded in the same period as the revenue they help generate?", options: ["Cash counting rules", "The Matching Principle", "Government regulation", "Asset parity"], ansKey: 8 },
+    { question: "How is 'Net Working Capital' derived?", options: ["Total Assets - Total Liabilities", "Current Assets - Current Liabilities", "Revenue - Expenses", "Cash Inflow - Outflow"], ansKey: 8 },
+    { question: "What does the 'Quick Ratio' measure?", options: ["Debt-to-Equity", "Short-term liquidity", "Return on Equity", "Gross Margin"], ansKey: 8 },
+    { question: "The Capital Asset Pricing Model (CAPM) is used to:", options: ["Price physical assets", "Calculate expected return based on risk", "Value brand equity", "Manage payroll"], ansKey: 8 },
+    { question: "What is the 'Rule of 72' used for?", options: ["Tax liabilities", "Estimating time to double an investment", "Inventory turnover", "Employee tenure"], ansKey: 8 },
 
     // OPERATIONS & EFFICIENCY
-    { question: "What is the primary objective of 'Lean Manufacturing'?", options: ["Maximize inventory", "Eliminate waste", "Reduce product variety", "Increase lead times"], answer: 1 },
-    { question: "What does 'DMAIC' stand for in Six Sigma?", options: ["Design, Manage, Assess, Improve, Control", "Define, Measure, Analyze, Improve, Control", "Draft, Model, Act, Initiate, Complete", "Direct, Monitor, Adjust, Inspect, Close"], answer: 1 },
-    { question: "The 'Theory of Constraints' focuses on:", options: ["Maximizing individual department output", "Managing the system bottleneck", "Reducing staff", "Buying cheaper materials"], answer: 1 },
-    { question: "What happens to unit costs as production volume increases (Economies of Scale)?", options: ["Costs increase", "Average unit cost decreases", "Profit decreases", "Market share stays flat"], answer: 1 },
-    { question: "What is 'Transfer Pricing'?", options: ["Internal transactions between divisions", "Employee transfer costs", "Tax on stock sales", "Consultant fees"], answer: 0 },
+    { question: "What is the primary objective of 'Lean Manufacturing'?", options: ["Maximize inventory", "Eliminate waste", "Reduce product variety", "Increase lead times"], ansKey: 8 },
+    { question: "What does 'DMAIC' stand for in Six Sigma?", options: ["Design, Manage, Assess, Improve, Control", "Define, Measure, Analyze, Improve, Control", "Draft, Model, Act, Initiate, Complete", "Direct, Monitor, Adjust, Inspect, Close"], ansKey: 8 },
+    { question: "The 'Theory of Constraints' focuses on:", options: ["Maximizing individual department output", "Managing the system bottleneck", "Reducing staff", "Buying cheaper materials"], ansKey: 8 },
+    { question: "What happens to unit costs as production volume increases (Economies of Scale)?", options: ["Costs increase", "Average unit cost decreases", "Profit decreases", "Market share stays flat"], ansKey: 8 },
+    { question: "What is 'Transfer Pricing'?", options: ["Internal transactions between divisions", "Employee transfer costs", "Tax on stock sales", "Consultant fees"], ansKey: 7 },
 
     // ORGANIZATIONAL BEHAVIOR
-    { question: "What is the fundamental conflict known as the 'Agency Problem'?", options: ["Board conflicts", "Shareholders vs. Management interests", "Hiring issues", "Government interference"], answer: 1 },
-    { question: "What is the main challenge in a 'Matrix Organizational Structure'?", options: ["Simple chain of command", "Reporting to multiple managers", "Centralized decisions", "Small startup size"], answer: 1 },
-    { question: "Which of these is a non-monetary incentive?", options: ["Performance bonus", "Stock options", "Flexible work arrangements", "Commission"], answer: 2 },
-    { question: "What is the function of a 'Golden Parachute'?", options: ["Executive exit compensation", "Employee long-service reward", "Stock price guarantee", "Anti-takeover defense"], answer: 0 },
-    { question: "What distinguishes 'Transformational' from 'Transactional' leadership?", options: ["Motivation/Change vs. Reward/Punishment", "Sales focus", "Accounting focus", "Asset focus"], answer: 0 },
+    { question: "What is the fundamental conflict known as the 'Agency Problem'?", options: ["Board conflicts", "Shareholders vs. Management interests", "Hiring issues", "Government interference"], ansKey: 8 },
+    { question: "What is the main challenge in a 'Matrix Organizational Structure'?", options: ["Simple chain of command", "Reporting to multiple managers", "Centralized decisions", "Small startup size"], ansKey: 8 },
+    { question: "Which of these is a non-monetary incentive?", options: ["Performance bonus", "Stock options", "Flexible work arrangements", "Commission"], ansKey: 9 }, // 2 + 7 = 9
+    { question: "What is the function of a 'Golden Parachute'?", options: ["Executive exit compensation", "Employee long-service reward", "Stock price guarantee", "Anti-takeover defense"], ansKey: 7 },
+    { question: "What distinguishes 'Transformational' from 'Transactional' leadership?", options: ["Motivation/Change vs. Reward/Punishment", "Sales focus", "Accounting focus", "Asset focus"], ansKey: 7 },
 
     // MARKET DYNAMICS
-    { question: "Why are firms in 'Perfect Competition' considered 'price takers'?", options: ["Significant market power", "Product differentiation", "Many buyers/sellers with perfect info", "Government price setting"], answer: 2 },
-    { question: "What does 'Price Elasticity of Demand' measure?", options: ["Supply change responsiveness", "Quantity demanded responsiveness to price", "Total revenue", "Raw material costs"], answer: 1 },
-    { question: "Which of these is a 'Leading Indicator'?", options: ["Unemployment rate", "Consumer Confidence Index", "GDP", "Historical sales"], answer: 1 },
-    { question: "What is 'Operating Leverage'?", options: ["Variable cost ratio", "Extent of fixed costs in business", "Ability to borrow", "Tax rates"], answer: 1 },
-    { question: "What is a danger of staying in the 'Maturity' phase of the product life cycle too long?", options: ["Excessive profit", "Stagnation and lack of innovation", "Lack of demand", "High marketing costs"], answer: 1 }
+    { question: "Why are firms in 'Perfect Competition' considered 'price takers'?", options: ["Significant market power", "Product differentiation", "Many buyers/sellers with perfect info", "Government price setting"], ansKey: 9 },
+    { question: "What does 'Price Elasticity of Demand' measure?", options: ["Supply change responsiveness", "Quantity demanded responsiveness to price", "Total revenue", "Raw material costs"], ansKey: 8 },
+    { question: "Which of these is a 'Leading Indicator'?", options: ["Unemployment rate", "Consumer Confidence Index", "GDP", "Historical sales"], ansKey: 8 },
+    { question: "What is 'Operating Leverage'?", options: ["Variable cost ratio", "Extent of fixed costs in business", "Ability to borrow", "Tax rates"], ansKey: 8 },
+    { question: "What is a danger of staying in the 'Maturity' phase of the product life cycle too long?", options: ["Excessive profit", "Stagnation and lack of innovation", "Lack of demand", "High marketing costs"], ansKey: 8 }
 ];
 
 let selectedAnswers = {};
@@ -91,7 +96,9 @@ async function submitExam() {
 
     let score = 0;
     QUESTIONS.forEach((q, idx) => {
-        if (selectedAnswers[idx] === q.answer) {
+        // Decode the true answer key index on submission comparison
+        const realAnswer = q.ansKey - ANSWER_KEY_OFFSET;
+        if (selectedAnswers[idx] === realAnswer) {
             score++;
         }
     });
