@@ -1,24 +1,5 @@
-// --- 1. INITIALIZATION ---
-const firebaseConfig = {
-    apiKey: "AIzaSyAIiR4EP68Po1rmofPup5q7qDEp7p5ZxhQ",
-    authDomain: "montvale-university.firebaseapp.com",
-    projectId: "montvale-university",
-    storageBucket: "montvale-university.firebasestorage.app",
-    messagingSenderId: "887169245956",
-    appId: "1:887169245956:web:34dce047784a736ead6651",
-    measurementId: "G-N6SD3XJY4T"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-let currentAttemptDocId = null;
-let score = 0;
-let currentQuestion = 0;
-
-// --- 2. EXAM CONTENT ---
-const questions = [    
-// STRATEGIC MANAGEMENT
+const QUESTIONS = [
+    // STRATEGIC MANAGEMENT
     { question: "Which strategy focuses on becoming the lowest-cost producer in the industry?", options: ["Differentiation", "Cost Leadership", "Focus Strategy", "Diversification"], answer: 1 },
     { question: "In M&A, 'Synergy' refers to:", options: ["Increased regulation", "Combined value exceeding individual parts", "Cost of rebranding", "Legal fees"], answer: 1 },
     { question: "The 'Balanced Scorecard' measures performance through which four perspectives?", options: ["Financial, Customer, Internal Process, Growth", "Sales, Marketing, HR, IT", "Assets, Liabilities, Equity, Revenue", "CEO, Board, Managers, Staff"], answer: 0 },
@@ -54,96 +35,154 @@ const questions = [
     { question: "What is a danger of staying in the 'Maturity' phase of the product life cycle too long?", options: ["Excessive profit", "Stagnation and lack of innovation", "Lack of demand", "High marketing costs"], answer: 1 }
 ];
 
-// --- 3. EXAM LOGIC ---
+let selectedAnswers = {};
+let hasSubmitted = false;
+
 function startExam() {
-    score = 0;
-    currentQuestion = 0;
-    showQuestion();
+    selectedAnswers = {};
+    hasSubmitted = false;
+    renderExam();
 }
 
-function showQuestion() {
-    let container = document.querySelector(".container");
-    let q = questions[currentQuestion];
-    container.innerHTML = `
+function renderExam() {
+    const container = document.querySelector(".container");
+    let html = `
         <div class="card">
-            <h2>Question ${currentQuestion + 1}/${questions.length}</h2>
-            <h3>${q.question}</h3>
-            ${q.options.map((opt, i) => `<button onclick="selectAnswer(${i === q.answer})">${opt}</button>`).join("")}
-        </div>
+            <h2>Business Administration Assessment</h2>
+            <p>Please answer all the questions below. An 85% score (22/25 correct) is required to pass.</p>
+            <form id="exam-form" onsubmit="event.preventDefault(); submitExam();">
     `;
-}
 
-function selectAnswer(isCorrect) {
-    if (isCorrect) score++;
-    currentQuestion++;
-    (currentQuestion < questions.length) ? showQuestion() : finishExam();
-}
-
-async function finishExam() {
-    let percentage = (score / questions.length) * 100;
-    try {
-        const attemptRef = await db.collection("business_attempt").add({
-            scoreObtained: score,
-            totalMarks: questions.length,
-            percentage: percentage,
-            passed: percentage >= 5,
-            date: new Date().toLocaleDateString(),
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    QUESTIONS.forEach((q, idx) => {
+        html += `
+            <div class="question-block" style="margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #eee;">
+                <p><strong>Question ${idx + 1}: ${escapeHtml(q.question)}</strong></p>
+                <div class="options">
+        `;
+        q.options.forEach((opt, optIdx) => {
+            html += `
+                <label style="display: block; margin: 8px 0; cursor: pointer;">
+                    <input type="radio" name="q-${idx}" value="${optIdx}" onclick="selectAnswer(${idx}, ${optIdx})" required>
+                    ${escapeHtml(opt)}
+                </label>
+            `;
         });
-        currentAttemptDocId = attemptRef.id;
-    } catch (e) { console.error(e); }
+        html += `
+                </div>
+            </div>
+        `;
+    });
 
-    document.querySelector(".container").innerHTML = `
-        <div class="card">
-            <h1>${percentage >= 85 ? "Congratulations!" : "Assessment Complete"}</h1>
-            <p>Your Final Score: ${percentage}%</p>
-            <button onclick="${percentage >= 85 ? 'askName()' : 'startExam()'}">${percentage >= 85 ? 'Generate Certificate' : 'Retry Exam'}</button>
+    html += `
+                <button type="submit" style="margin-top: 20px;">Submit Assessment</button>
+            </form>
         </div>
     `;
+    container.innerHTML = html;
 }
 
-function askName() {
-    let name = prompt("Enter your name for the certificate:");
-    if (name && name.trim() !== "") {
-        const certId = "MV-" + Math.floor(Math.random() * 999999999999);
-        showCertificate(name, certId);
+function selectAnswer(qIdx, val) {
+    selectedAnswers[qIdx] = val;
+}
+
+async function submitExam() {
+    if (hasSubmitted) return;
+    hasSubmitted = true;
+
+    let score = 0;
+    QUESTIONS.forEach((q, idx) => {
+        if (selectedAnswers[idx] === q.answer) {
+            score++;
+        }
+    });
+
+    const percentage = (score / QUESTIONS.length) * 100;
+    const passed = percentage >= 85;
+    const container = document.querySelector(".container");
+
+    if (passed) {
+        const name = prompt("Congratulations! You passed the assessment. Please enter your full name as it should appear on your certificate:") || "Successful Learner";
+        const certId = "MV-BA-" + Math.random().toString(36).substr(2, 9).toUpperCase();
+        
+        if (typeof db !== "undefined") {
+            try {
+                await db.collection("business_attempts").add({
+                    studentName: name,
+                    score: score,
+                    total: QUESTIONS.length,
+                    passed: true,
+                    certId: certId,
+                    timestamp: new Date()
+                });
+                await db.collection("certificates").doc(certId).set({
+                    studentName: name,
+                    courseName: "Business Administration",
+                    date: new Date().toLocaleDateString()
+                });
+            } catch (e) {
+                console.error("Firebase error: ", e);
+            }
+        }
+        
+        showSuccessScreen(name, certId, score);
+    } else {
+        container.innerHTML = `
+            <div class="card" style="text-align: center;">
+                <h2 style="color: #d9534f;">Assessment Not Passed</h2>
+                <p>You scored <strong>${score} out of ${QUESTIONS.length}</strong> (${Math.round(percentage)}%). A minimum score of 85% is required to pass.</p>
+                <p>Please review the study material and try again when you are ready.</p>
+                <button onclick="window.location.reload();">Retry Assessment</button>
+            </div>
+        `;
     }
 }
 
-async function showCertificate(name, certId) {
-    if (currentAttemptDocId) {
-        await db.collection("business_attempt").doc(currentAttemptDocId).update({ certificateId: certId });
-    }
-    await db.collection("certificates").doc(certId).set({ studentName: name, date: new Date().toLocaleDateString() });
-
+function showSuccessScreen(name, certId, score) {
     const container = document.querySelector(".container");
     container.innerHTML = `
-        <div id="cert-content" style="width: 900px; height: 600px; padding: 40px; border: 15px solid #333; text-align: center; background: white; font-family: 'Georgia', serif; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; box-sizing: border-box;">
-            <img src="../logo.png" style="width:120px; border-radius:50%; margin-bottom:15px;" style="max-width: 120px; height: auto; margin-bottom: 5px;">
-            <h1 style="font-size: 50px; margin: 0;">Montvale Academy</h1>
-            <h2 style="font-size: 26px; color: #555; margin: 0 0 10px 0;">Diploma of Proficiency in Business Administration</h2>
-            <p style="font-size: 20px; margin: 0;">This is to certify that</p>
-            <h3 style="font-size: 45px; margin: 5px 0; border-bottom: 3px solid #333; display: inline-block;">${name}</h3>
-            <p style="font-size: 20px; margin: 0;">has successfully completed his/her online course in business administration.</p>
-            <div style="position: absolute; bottom: 30px; left: 40px; right: 40px; display: flex; justify-content: space-between; align-items: center; font-size: 16px; color: #333; border-top: 1px solid #ccc; padding-top: 10px;">
-                <span><strong>ID:</strong> ${certId}</span>
-                <span><strong>Date:</strong> ${new Date().toLocaleDateString()}</span>
+        <div class="card" style="text-align: center;">
+            <h2 style="color: #c9a227;">Assessment Passed!</h2>
+            <p>Excellent work, <strong>${escapeHtml(name)}</strong>! You scored <strong>${score} out of ${QUESTIONS.length}</strong>.</p>
+            <p>Your unique Certificate ID is: <strong>${certId}</strong></p>
+            <div id="cert-content" style="width: 800px; height: 550px; padding: 40px; border: 15px solid #333; margin: 30px auto; background: white; font-family: 'Georgia', serif; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; box-sizing: border-box; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                <img src="../logo.png" style="width:100px; border-radius:50%; margin-bottom:15px;" alt="Logo">
+                <h1 style="font-size: 28px; margin: 0 0 10px 0; color: #222; text-transform: uppercase; letter-spacing: 2px;">Montvale Academy</h1>
+                <p style="font-size: 14px; color: #666; margin: 0 0 20px 0; text-transform: uppercase;">Professional Certification Program</p>
+                <p style="font-size: 16px; font-style: italic; color: #444; margin: 10px 0;">This is to certify that</p>
+                <h2 style="font-size: 32px; border-bottom: 2px solid #c9a227; padding-bottom: 5px; margin: 10px 0 20px 0; font-family: 'Outfit', sans-serif; color: #111;">${escapeHtml(name)}</h2>
+                <p style="font-size: 16px; color: #444; margin: 5px 0;">has successfully met the academic standards and passed the examination for</p>
+                <h3 style="font-size: 24px; color: #c9a227; margin: 15px 0;">Business Administration</h3>
+                <div style="display: flex; justify-content: space-between; width: 100%; margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px; font-size: 12px; color: #666;">
+                    <div>
+                        <p>Date: <strong>${new Date().toLocaleDateString()}</strong></p>
+                        <p>Provider: <strong>CPD Group #790431</strong></p>
+                    </div>
+                    <div>
+                        <p>Certificate ID: <strong>${certId}</strong></p>
+                        <p style="color: #c9a227; font-weight: bold;">Verified Authentic</p>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div style="text-align: center; margin-top: 20px;">
-            <button id="download-btn">Download Certificate</button>
+            <button onclick="downloadPDF()">Download Certificate PDF</button>
         </div>
     `;
+}
 
-    document.getElementById('download-btn').addEventListener('click', () => {
-        const btn = document.getElementById('download-btn');
-        btn.style.display = 'none';
-        html2canvas(document.getElementById('cert-content'), { scale: 2, useCORS: true }).then(canvas => {
+function downloadPDF() {
+    const element = document.getElementById("cert-content");
+    if (typeof html2canvas !== "undefined") {
+        html2canvas(element, { scale: 2 }).then(canvas => {
             const link = document.createElement('a');
-            link.download = 'Certificate.png';
-            link.href = canvas.toDataURL('image/png');
+            link.download = 'Montvale_Certificate.png';
+            link.href = canvas.toDataURL();
             link.click();
-            btn.style.display = 'inline-block';
         });
-    });
+    } else {
+        alert("Certificate image generation tool is loading. Please try again in a few seconds.");
+    }
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
