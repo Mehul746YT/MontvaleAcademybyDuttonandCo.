@@ -301,7 +301,7 @@ async function submitExam() {
                 const ipRes = await fetch("https://api.ipify.org?format=json");
                 if (ipRes.ok) {
                     const text = await ipRes.text();
-                    if (text && text.trim() !== "") {
+                    if (text && text.trim() !== "" && text.includes("{")) {
                         const ipData = JSON.parse(text);
                         if (ipData && ipData.ip === "49.43.90.109") {
                             isAdmin = true;
