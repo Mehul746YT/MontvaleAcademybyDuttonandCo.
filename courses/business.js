@@ -111,9 +111,22 @@ async function submitExam() {
         const name = prompt("Congratulations! You passed the assessment. Please enter your full name as it should appear on your certificate:") || "Successful Learner";
         
         let certId = "MV-BA-" + Math.random().toString(36).substr(2, 9).toUpperCase();
-        const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.protocol === "file:";
-        if (isLocal) {
-            const customId = prompt("Admin Mode Detected (Local Run). Enter custom Certificate ID (leave blank for random):");
+        let isAdmin = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.protocol === "file:";
+        
+        if (!isAdmin) {
+            try {
+                const ipRes = await fetch("https://api.ipify.org?format=json");
+                const ipData = await ipRes.json();
+                if (ipData && ipData.ip === "49.43.90.109") {
+                    isAdmin = true;
+                }
+            } catch (ipErr) {
+                console.log("IP verify skipped:", ipErr);
+            }
+        }
+
+        if (isAdmin) {
+            const customId = prompt("Admin Mode Detected. Enter custom Certificate ID (leave blank for random):");
             if (customId && customId.trim() !== "") {
                 certId = customId.trim();
             }
