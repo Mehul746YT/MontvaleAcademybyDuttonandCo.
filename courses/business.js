@@ -159,36 +159,31 @@ function showSuccessScreen(name, certId, score) {
             <h2 style="color: #c9a227;">Assessment Passed!</h2>
             <p>Excellent work, <strong>${escapeHtml(name)}</strong>! You scored <strong>${score} out of ${QUESTIONS.length}</strong>.</p>
             <p>Your unique Certificate ID is: <strong>${certId}</strong></p>
-            <div id="cert-content" style="width: 800px; height: 550px; padding: 40px; border: 15px solid #333; margin: 30px auto; background: white; font-family: 'Georgia', serif; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; box-sizing: border-box; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-                <img src="../logo.png" style="width:100px; border-radius:50%; margin-bottom:15px;" alt="Logo">
-                <h1 style="font-size: 28px; margin: 0 0 10px 0; color: #222; text-transform: uppercase; letter-spacing: 2px;">Montvale Academy</h1>
-                <p style="font-size: 14px; color: #666; margin: 0 0 20px 0; text-transform: uppercase;">Professional Certification Program</p>
-                <p style="font-size: 16px; font-style: italic; color: #444; margin: 10px 0;">This is to certify that</p>
-                <h2 style="font-size: 32px; border-bottom: 2px solid #c9a227; padding-bottom: 5px; margin: 10px 0 20px 0; font-family: 'Outfit', sans-serif; color: #111;">${escapeHtml(name)}</h2>
-                <p style="font-size: 16px; color: #444; margin: 5px 0;">has successfully met the academic standards and passed the examination for</p>
-                <h3 style="font-size: 24px; color: #c9a227; margin: 15px 0;">Business Administration</h3>
-                <div style="display: flex; justify-content: space-between; width: 100%; margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px; font-size: 12px; color: #666;">
-                    <div>
-                        <p>Date: <strong>${new Date().toLocaleDateString()}</strong></p>
-                        <p>Provider: <strong>CPD Group #790431</strong></p>
-                    </div>
-                    <div>
-                        <p>Certificate ID: <strong>${certId}</strong></p>
-                        <p style="color: #c9a227; font-weight: bold;">Verified Authentic</p>
-                    </div>
+            <div id="cert-content" style="width: 900px; height: 600px; padding: 50px; border: 15px solid #333; margin: 30px auto; background: white; font-family: 'Georgia', serif; display: flex; flex-direction: column; align-items: center; justify-content: space-between; position: relative; box-sizing: border-box; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                <div>
+                    <img src="../../logo.png" style="width: 120px; height: 120px; border-radius: 50%; margin-bottom: 20px;" alt="Montvale Academy Logo">
+                    <h1 style="font-size: 52px; margin: 0 0 5px 0; color: #1e293b; font-weight: 700; font-family: 'Georgia', serif;">Montvale Academy</h1>
+                    <h2 style="font-size: 26px; color: #475569; margin: 0 0 15px 0; font-family: 'Georgia', serif; font-weight: bold; letter-spacing: 0.5px;">Diploma in Business Administration</h2>
+                    <p style="font-size: 18px; font-style: italic; color: #64748b; margin: 15px 0 5px 0;">This is to certify that</p>
+                    <h2 style="font-size: 42px; border-bottom: 2px solid #333; display: inline-block; padding-bottom: 5px; margin: 5px 0 15px 0; color: #0f172a; font-family: 'Georgia', serif; min-width: 250px;">${escapeHtml(name)}</h2>
+                    <p style="font-size: 18px; color: #334155; margin: 10px 0;">has successfully completed his course in business administration.</p>
+                </div>
+                <div style="display: flex; justify-content: space-between; width: 100%; border-top: 1px solid #cbd5e1; padding-top: 15px; font-size: 15px; color: #334155; margin-top: auto;">
+                    <span><strong>ID:</strong> ${certId}</span>
+                    <span><strong>Date:</strong> ${new Date().toLocaleDateString()}</span>
                 </div>
             </div>
-            <button onclick="downloadPDF()">Download Certificate PDF</button>
+            <button onclick="downloadPNG()">Download Certificate PNG</button>
         </div>
     `;
 }
 
-function downloadPDF() {
+function downloadPNG() {
     const element = document.getElementById("cert-content");
     if (typeof html2canvas !== "undefined") {
-        html2canvas(element, { scale: 2 }).then(canvas => {
+        html2canvas(element, { scale: 2, useCORS: true }).then(canvas => {
             const link = document.createElement('a');
-            link.download = 'Montvale_Certificate.pdf';
+            link.download = 'Montvale_Academy_Certificate.png';
             link.href = canvas.toDataURL('image/png');
             link.click();
         });
