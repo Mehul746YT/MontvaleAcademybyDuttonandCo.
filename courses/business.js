@@ -134,7 +134,7 @@ async function submitExam() {
         
         if (typeof db !== "undefined") {
             try {
-                await db.collection("business_attempts").add({
+                await db.collection("business_attempt").add({
                     studentName: name,
                     score: score,
                     total: QUESTIONS.length,
