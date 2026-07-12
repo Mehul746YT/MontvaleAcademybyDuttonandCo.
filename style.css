@@ -330,8 +330,7 @@ button:active,
     width: 100%;
     max-width: 900px;
     aspect-ratio: 1.4 / 1;
-    border: 15px solid transparent;
-    border-image: var(--gold-gradient) 30 round;
+    border: 15px solid #333;
     padding: 45px;
     background: #fff;
     margin: 30px auto;
