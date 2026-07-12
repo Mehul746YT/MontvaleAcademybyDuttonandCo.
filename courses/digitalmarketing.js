@@ -371,8 +371,8 @@ function downloadPDF() {
     if (typeof html2canvas !== "undefined") {
         html2canvas(element, { scale: 2 }).then(canvas => {
             const link = document.createElement('a');
-            link.download = 'Montvale_Certificate.png';
-            link.href = canvas.toDataURL();
+            link.download = 'Montvale_Certificate.pdf';
+            link.href = canvas.toDataURL('image/png');
             link.click();
         });
     } else {
