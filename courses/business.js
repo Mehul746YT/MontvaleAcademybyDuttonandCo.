@@ -169,11 +169,11 @@ async function showCertificate(name, certId) {
     container.innerHTML = `
         <div id="cert-content" style="width: 900px; height: 600px; padding: 40px; border: 15px solid #333; text-align: center; background: white; font-family: 'Georgia', serif; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; box-sizing: border-box; margin: 30px auto; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
             <img src="../../logo.png" style="max-width: 120px; height: auto; margin-bottom: 5px;">
-            <h1 style="font-size: 50px; margin: 0;">Montvale Academy</h1>
-            <h2 style="font-size: 26px; color: #555; margin: 0 0 10px 0;">Diploma of Proficiency in Business Administration</h2>
-            <p style="font-size: 20px; margin: 0;">This is to certify that</p>
+            <h1 style="font-size: 50px; margin: 0; color: #111; font-weight: bold; text-align: center; width: 100%;">Montvale Academy</h1>
+            <h2 style="font-size: 26px; color: #555; margin: 5px 0 15px 0; font-weight: normal; text-align: center; width: 100%;">Diploma of Proficiency in Business Administration</h2>
+            <p style="font-size: 20px; margin: 0; text-align: center; width: 100%;">This is to certify that</p>
             <h3 style="font-size: 45px; margin: 5px 0; border-bottom: 3px solid #333; display: inline-block;">${escapeHtml(name)}</h3>
-            <p style="font-size: 20px; margin: 0;">has successfully completed his online course in business administration.</p>
+            <p style="font-size: 20px; margin: 0; text-align: center; width: 100%;">has successfully completed his online course in business administration.</p>
             <div style="position: absolute; bottom: 30px; left: 40px; right: 40px; display: flex; justify-content: space-between; align-items: center; font-size: 16px; color: #333; border-top: 1px solid #ccc; padding-top: 10px;">
                 <span><strong>ID:</strong> ${certId}</span>
                 <span><strong>Date:</strong> ${new Date().toLocaleDateString()}</span>
