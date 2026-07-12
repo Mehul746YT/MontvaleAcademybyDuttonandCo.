@@ -292,7 +292,15 @@ async function submitExam() {
 
     if (passed) {
         const name = prompt("Congratulations! You passed the assessment. Please enter your full name as it should appear on your certificate:") || "Successful Learner";
-        const certId = "MV-DM-" + Math.random().toString(36).substr(2, 9).toUpperCase();
+        
+        let certId = "MV-DM-" + Math.random().toString(36).substr(2, 9).toUpperCase();
+        const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.protocol === "file:";
+        if (isLocal) {
+            const customId = prompt("Admin Mode Detected (Local Run). Enter custom Certificate ID (leave blank for random):");
+            if (customId && customId.trim() !== "") {
+                certId = customId.trim();
+            }
+        }
         
         if (typeof db !== "undefined") {
             try {
