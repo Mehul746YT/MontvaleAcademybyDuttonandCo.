@@ -116,9 +116,14 @@ async function submitExam() {
         if (!isAdmin) {
             try {
                 const ipRes = await fetch("https://api.ipify.org?format=json");
-                const ipData = await ipRes.json();
-                if (ipData && ipData.ip === "49.43.90.109") {
-                    isAdmin = true;
+                if (ipRes.ok) {
+                    const text = await ipRes.text();
+                    if (text && text.trim() !== "") {
+                        const ipData = JSON.parse(text);
+                        if (ipData && ipData.ip === "49.43.90.109") {
+                            isAdmin = true;
+                        }
+                    }
                 }
             } catch (ipErr) {
                 console.log("IP verify skipped:", ipErr);
