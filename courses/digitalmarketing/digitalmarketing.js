@@ -320,8 +320,10 @@ async function submitExam() {
             }
         }
         
+        console.log("Firebase DB variable status:", typeof db);
         if (typeof db !== "undefined") {
             try {
+                console.log("Attempting to write digital_attempt to Firestore...");
                 await db.collection("digital_attempt").add({
                     studentName: name,
                     score: score,
@@ -330,14 +332,18 @@ async function submitExam() {
                     certId: certId,
                     timestamp: new Date()
                 });
+                console.log("digital_attempt written successfully! Attempting to write certificate...");
                 await db.collection("certificates").doc(certId).set({
                     studentName: name,
                     courseName: "Digital Marketing & Analytics",
                     date: new Date().toLocaleDateString()
                 });
+                console.log("Certificate written successfully to Firestore!");
             } catch (e) {
-                console.error("Firebase error: ", e);
+                console.error("Firebase write error caught: ", e);
             }
+        } else {
+            console.warn("Firebase db variable is undefined. Check SDK initialization.");
         }
         
         showSuccessScreen(name, certId, score);
