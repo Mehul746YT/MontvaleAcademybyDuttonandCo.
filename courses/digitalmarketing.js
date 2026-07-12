@@ -336,43 +336,48 @@ async function submitExam() {
 }
 
 function showSuccessScreen(name, certId, score) {
-    const container = document.querySelector(".container");
-    container.innerHTML = `
-        <div class="card" style="text-align: center;">
-            <h2 style="color: #c9a227;">Assessment Passed!</h2>
-            <p>Excellent work, <strong>${escapeHtml(name)}</strong>! You scored <strong>${score} out of 20</strong>.</p>
-            <p>Your unique Certificate ID is: <strong>${certId}</strong></p>
-            <div id="cert-content" style="width: 900px; height: 600px; padding: 50px; border: 15px solid #333; margin: 30px auto; background: white; font-family: 'Georgia', serif; display: flex; flex-direction: column; align-items: center; justify-content: space-between; position: relative; box-sizing: border-box; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-                <div>
-                    <img src="../../logo.png" style="width: 120px; height: 120px; border-radius: 50%; margin-bottom: 20px;" alt="Montvale Academy Logo">
-                    <h1 style="font-size: 52px; margin: 0 0 5px 0; color: #1e293b; font-weight: 700; font-family: 'Georgia', serif;">Montvale Academy</h1>
-                    <h2 style="font-size: 26px; color: #475569; margin: 0 0 15px 0; font-family: 'Georgia', serif; font-weight: bold; letter-spacing: 0.5px;">Diploma in Digital Marketing &amp; Analytics</h2>
-                    <p style="font-size: 18px; font-style: italic; color: #64748b; margin: 15px 0 5px 0;">This is to certify that</p>
-                    <h2 style="font-size: 42px; border-bottom: 2px solid #333; display: inline-block; padding-bottom: 5px; margin: 5px 0 15px 0; color: #0f172a; font-family: 'Georgia', serif; min-width: 250px;">${escapeHtml(name)}</h2>
-                    <p style="font-size: 18px; color: #334155; margin: 10px 0;">has successfully completed his course in digital marketing &amp; analytics.</p>
-                </div>
-                <div style="display: flex; justify-content: space-between; width: 100%; border-top: 1px solid #cbd5e1; padding-top: 15px; font-size: 15px; color: #334155; margin-top: auto;">
-                    <span><strong>ID:</strong> ${certId}</span>
-                    <span><strong>Date:</strong> ${new Date().toLocaleDateString()}</span>
-                </div>
-            </div>
-            <button onclick="downloadPNG()">Download Certificate PNG</button>
-        </div>
-    `;
+    showCertificate(name, certId);
 }
 
-function downloadPNG() {
-    const element = document.getElementById("cert-content");
-    if (typeof html2canvas !== "undefined") {
-        html2canvas(element, { scale: 2, useCORS: true }).then(canvas => {
+async function showCertificate(name, certId) {
+    if (typeof db !== "undefined" && currentAttemptDocId) {
+        try {
+            await db.collection("digital_attempts").doc(currentAttemptDocId).update({ certificateId: certId });
+        } catch (e) {
+            console.error("Firebase update error: ", e);
+        }
+    }
+
+    const container = document.querySelector(".container");
+    container.innerHTML = `
+        <div id="cert-content" style="width: 900px; height: 600px; padding: 40px; border: 15px solid #333; text-align: center; background: white; font-family: 'Georgia', serif; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; box-sizing: border-box; margin: 30px auto; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <img src="../../logo.png" style="max-width: 120px; height: auto; margin-bottom: 5px;">
+            <h1 style="font-size: 50px; margin: 0;">Montvale Academy</h1>
+            <h2 style="font-size: 26px; color: #555; margin: 0 0 10px 0;">Diploma of Proficiency in Digital Marketing &amp; Analytics</h2>
+            <p style="font-size: 20px; margin: 0;">This is to certify that</p>
+            <h3 style="font-size: 45px; margin: 5px 0; border-bottom: 3px solid #333; display: inline-block;">${escapeHtml(name)}</h3>
+            <p style="font-size: 20px; margin: 0;">has successfully completed his online course in digital marketing &amp; analytics.</p>
+            <div style="position: absolute; bottom: 30px; left: 40px; right: 40px; display: flex; justify-content: space-between; align-items: center; font-size: 16px; color: #333; border-top: 1px solid #ccc; padding-top: 10px;">
+                <span><strong>ID:</strong> ${certId}</span>
+                <span><strong>Date:</strong> ${new Date().toLocaleDateString()}</span>
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 20px;">
+            <button id="download-btn">Download Certificate</button>
+        </div>
+    `;
+
+    document.getElementById('download-btn').addEventListener('click', () => {
+        const btn = document.getElementById('download-btn');
+        btn.style.display = 'none';
+        html2canvas(document.getElementById('cert-content'), { scale: 2, useCORS: true }).then(canvas => {
             const link = document.createElement('a');
-            link.download = 'Montvale_Academy_Certificate.png';
+            link.download = 'Certificate.png';
             link.href = canvas.toDataURL('image/png');
             link.click();
+            btn.style.display = 'inline-block';
         });
-    } else {
-        alert("Certificate image generation tool is loading. Please try again in a few seconds.");
-    }
+    });
 }
 
 function escapeHtml(str) {
