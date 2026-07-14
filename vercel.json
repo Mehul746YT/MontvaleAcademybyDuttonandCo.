@@ -1,15 +1,25 @@
 {
   "version": 2,
-  "builds": [
+  "rewrites": [
     {
-      "src": "api/submit.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
+      "source": "/api/submit",
+      "destination": "/api/submit.js"
+    },
     {
-      "src": "/api/submit",
-      "dest": "api/submit.js"
+      "source": "/courses/business",
+      "destination": "/courses/business/index.html"
+    },
+    {
+      "source": "/courses/digitalmarketing",
+      "destination": "/courses/digitalmarketing/index.html"
+    },
+    {
+      "source": "/partners",
+      "destination": "/partners/index.html"
+    },
+    {
+      "source": "/policies",
+      "destination": "/policies/index.html"
     }
   ]
 }
