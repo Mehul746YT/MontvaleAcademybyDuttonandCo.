@@ -1,0 +1,9 @@
+{
+  "name": "montvale-academy-api",
+  "version": "1.0.0",
+  "description": "Serverless API for Montvale Academy",
+  "main": "api/submit.js",
+  "dependencies": {
+    "mongodb": "^6.3.0"
+  }
+}

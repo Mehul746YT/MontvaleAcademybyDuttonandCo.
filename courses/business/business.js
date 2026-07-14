@@ -137,30 +137,28 @@ async function submitExam() {
             }
         }
         
-        console.log("Firebase DB variable status:", typeof db);
-        if (typeof db !== "undefined") {
-            try {
-                console.log("Attempting to write business_attempt to Firestore...");
-                await db.collection("business_attempt").add({
-                    studentName: name,
+        try {
+            console.log("Saving results securely to MongoDB API...");
+            const res = await fetch("/api/submit", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    type: "business",
+                    name: name,
                     score: score,
                     total: QUESTIONS.length,
-                    passed: true,
-                    certId: certId,
-                    timestamp: new Date()
-                });
-                console.log("business_attempt written successfully! Attempting to write certificate...");
-                await db.collection("certificates").doc(certId).set({
-                    studentName: name,
-                    courseName: "Business Administration",
-                    date: new Date().toLocaleDateString()
-                });
-                console.log("Certificate written successfully to Firestore!");
-            } catch (e) {
-                console.error("Firebase write error caught: ", e);
+                    certId: certId
+                })
+            });
+            if (res.ok) {
+                console.log("Success! Attempt and Certificate details stored securely in MongoDB.");
+            } else {
+                console.error("Secure API write returned status code:", res.status);
             }
-        } else {
-            console.warn("Firebase db variable is undefined. Check SDK initialization.");
+        } catch (e) {
+            console.error("API connection error: ", e);
         }
         
         showSuccessScreen(name, certId, score);
@@ -181,14 +179,6 @@ function showSuccessScreen(name, certId, score) {
 }
 
 async function showCertificate(name, certId) {
-    if (typeof db !== "undefined" && currentAttemptDocId) {
-        try {
-            await db.collection("business_attempts").doc(currentAttemptDocId).update({ certificateId: certId });
-        } catch (e) {
-            console.error("Firebase update error: ", e);
-        }
-    }
-
     const container = document.querySelector(".container");
     container.innerHTML = `
         <div id="cert-content" style="width: 900px; height: 600px; padding: 40px; border: 15px solid #333; text-align: center; background: white; font-family: 'Georgia', serif; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; box-sizing: border-box; margin: 30px auto; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
