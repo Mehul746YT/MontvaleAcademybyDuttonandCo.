@@ -322,7 +322,12 @@ async function submitExam() {
         
         try {
             console.log("Saving results securely to MongoDB API...");
-            const res = await fetch("/api/submit", {
+            // We set the URL of your Vercel serverless deployment endpoint
+            const vercelApiUrl = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" 
+                ? "/api/submit" 
+                : "https://montvale-academy-api.vercel.app/api/submit";
+
+            const res = await fetch(vercelApiUrl, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
